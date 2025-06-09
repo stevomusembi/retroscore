@@ -58,8 +58,8 @@ public class Match {
     @Column(name = "away_red_cards")
     private Integer awayRedCards;
 
-    @Column(name = "gameweek")
-    private Integer gameweek;
+    @Column(name = "game_week")
+    private Integer gameWeek;
 
     public String getScoreString(){
         return homeScore + "-" + awayScore;

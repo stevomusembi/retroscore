@@ -1,10 +1,12 @@
 package com.retroscore.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @Table(name = "users")
 public class User {
     @Id
