@@ -38,6 +38,7 @@ public class GameService {
     }
 
     public User getUserStats(Long userId){
+        System.out.println("apa hivi");
         Optional<User> user = userRepository.findById(userId);
         if(user.isPresent()){
             return user.get();

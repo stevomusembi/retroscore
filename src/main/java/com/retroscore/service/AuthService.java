@@ -26,7 +26,7 @@ public class AuthService {
         String username = user.getUsername();
         String password = user.getPassword();
 
-        if(userRepository.ExistsByUsername(username)){
+        if(userRepository.existsByUsername(username)){
             throw new ConflictException("username already exists");
         }
         if(username != null && password!= null && password.length() > 8 && !username.isEmpty()){
