@@ -27,9 +27,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DataImportService {
 
-    private MatchRepository matchRepository;
-    private SeasonRepository seasonRepository;
-    private FootballClubRepository footballClubRepository;
+    private final MatchRepository matchRepository;
+    private final SeasonRepository seasonRepository;
+    private final FootballClubRepository footballClubRepository;
+
 
     private  static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -78,7 +79,7 @@ public class DataImportService {
     }
 
     private Season findOrCreateSeason(String seasonName){
-        return seasonRepository.findByName(seasonName)
+        return seasonRepository.findBySeasonName(seasonName)
                 .orElseGet(() -> {
                     Season newSeason = new Season();
                     newSeason.setSeasonName(seasonName);

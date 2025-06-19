@@ -5,22 +5,27 @@ import com.retroscore.entity.Match;
 import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
 import com.retroscore.service.AuthService;
+import com.retroscore.service.DataImportService;
 import com.retroscore.service.GameService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.PublicKey;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 public class RetroScoreController {
 
     private AuthService authService;
     private GameService gameService;
+    private DataImportService dataImportService;
 
-    public RetroScoreController(AuthService authService, GameService gameService){
+    public RetroScoreController(AuthService authService, GameService gameService, DataImportService dataImportService){
         this.authService = authService;
         this.gameService = gameService;
+        this.dataImportService = dataImportService;
     }
 
     @PostMapping("register")
@@ -53,9 +58,5 @@ public class RetroScoreController {
         return ResponseEntity.ok().body(gameService.getUserStats(userId));
     }
 
-//    @GetMapping("user/history")
-//    public ResponseEntity<?> getUserHistory(User user){
-//        return ResponseEntity.ok().body(gameService.getUserHistory());
-//    }
 
 }

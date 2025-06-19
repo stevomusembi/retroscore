@@ -4,6 +4,11 @@ spring:
     username: retroscore_admin
     password: admin
     driver-class-name: org.postgresql.Driver
+    security:
+      user:
+        name: user
+        password: test
+        roles: USER
 
   jpa:
     hibernate:
@@ -24,3 +29,5 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+    com.retroscore: DEBUG
