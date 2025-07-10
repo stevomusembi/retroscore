@@ -66,6 +66,10 @@ public class Match {
     }
 
     public String getMatchTitle(){
-        return homeTeam.getName() + "vs" + awayTeam.getName();
+        return homeTeam.getName() + " vs " + awayTeam.getName();
+    }
+
+    public String getMatchStadiumName(){
+        return homeTeam.getStadiumName();
     }
 }

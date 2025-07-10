@@ -1,6 +1,9 @@
 package com.retroscore.controller;
 
 
+import com.retroscore.dto.MatchDto;
+import com.retroscore.dto.UserGameResponse;
+import com.retroscore.dto.UserGuessDto;
 import com.retroscore.entity.Match;
 import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @RestController
+@RequestMapping("/api/")
 public class RetroScoreController {
 
     private AuthService authService;
@@ -40,16 +44,18 @@ public class RetroScoreController {
         return ResponseEntity.ok().body(authService.login(user));
     }
 
-    // TODO add endpoint for filters for random game by season and club
+    // TODO add filters for random game by season and club
 
     @GetMapping("game/random-match")
-    public ResponseEntity<Match> getRandomMatch(){
-        return ResponseEntity.ok().body(gameService.getRandomMatch());
+    public ResponseEntity<MatchDto> getRandomMatch(@RequestParam(required = false) Long teamId){
+        MatchDto match = gameService.getRandomMatch(teamId);
+        return ResponseEntity.ok().body(match);
     }
 
     @PostMapping("game/guess")
-    public ResponseEntity<UserGame> submitGuess(UserGame userGame){
-        return ResponseEntity.ok().body(gameService.submitGuess(userGame));
+    public ResponseEntity<UserGameResponse> submitGuess(@RequestParam(required = false) Long userId,  UserGuessDto userGuess) {
+        UserGameResponse response = gameService.submitGuess(userId, userGuess);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("user/stats")

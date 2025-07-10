@@ -18,4 +18,17 @@ public class ExceptionAndErrorController {
     public String handleDuplicateUsername(ConflictException ex){
         return ex.getMessage();
     }
+
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleMatchNotFound(MatchNotFoundException ex){
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleUserAlreadyPlayedException(UserAlreadyPlayedException ex){
+        return ex.getMessage();
+    }
 }

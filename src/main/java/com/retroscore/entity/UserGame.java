@@ -2,9 +2,11 @@ package com.retroscore.entity;
 
 import com.retroscore.enums.GameResult;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "user_games")
 public class UserGame {
