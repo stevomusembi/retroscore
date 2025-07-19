@@ -8,6 +8,7 @@ import com.retroscore.entity.FootballClub;
 import com.retroscore.entity.Match;
 import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
+import com.retroscore.enums.GameResult;
 import com.retroscore.exception.MatchNotFoundException;
 import com.retroscore.exception.UserAlreadyPlayedException;
 import com.retroscore.repository.MatchRepository;
@@ -26,9 +27,9 @@ import java.util.Random;
 @Service
 public class GameService {
 
-    private  MatchRepository matchRepository;
-    private UserGameRepository userGameRepository;
-    private UserRepository userRepository;
+    private final MatchRepository matchRepository;
+    private final UserGameRepository userGameRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public GameService(MatchRepository matchRepository, UserGameRepository userGameRepository, UserRepository userRepository) {
@@ -96,12 +97,9 @@ public class GameService {
         User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User not found"));
 
         // validate the match exists
-        Match match = matchRepository.findById(Math.toIntExact(userGuess.getMatchId())).orElseThrow(()-> new MatchNotFoundException(userGuess.getMatchId()));
-
-
+        Match match = matchRepository.findById(userGuess.getMatchId()).orElseThrow(()-> new MatchNotFoundException(userGuess.getMatchId()));
 
         // check if user has played the specific match before
-
         Optional<UserGame> existingUserGame = userGameRepository.findByUserIdAndMatchId(userId, match.getId());
         if (existingUserGame.isPresent()){
             throw new UserAlreadyPlayedException(userId, match.getId());
@@ -119,13 +117,28 @@ public class GameService {
         //calculate other user game results
         calculateGameResult(userGame,match);
 
-        System.out.println("user guess is " + userGuess);
-        return null;
-        //userGameRepository.save(userGuess);
+        UserGame savedGame =  userGameRepository.save(userGame);
+
+        return buildUserGameResponse(savedGame, match);
     }
 
     private void calculateGameResult(UserGame userGame, Match match){
-        
+        Integer actualHomeScore = match.getHomeScore();
+        Integer actualAwayScore = match.getAwayScore();
+        Integer predictedHomeScore = userGame.getPredictedHomeScore();
+        Integer predictedAwayScore = userGame.getPredictedAwayScore();
+
+        boolean isCorrectScore = actualHomeScore.equals(predictedHomeScore) && actualAwayScore.equals(predictedAwayScore);
+        userGame.setIsCorrectScore(isCorrectScore);
+
+
+        boolean isCorrectResult = isCorrectScore || (getMatchResult(actualHomeScore,actualAwayScore) == getMatchResult(predictedHomeScore,predictedAwayScore));
+        userGame.setIsCorrectResult(isCorrectResult);
+
+    }
+
+    private int getMatchResult(Integer homeScore, Integer awayScore){
+        return homeScore.compareTo(awayScore);
     }
 
     public User getUserStats(Long userId){
@@ -134,6 +147,43 @@ public class GameService {
         return user.orElse(null);
     }
 
+    private UserGameResponse buildUserGameResponse(UserGame userGame, Match match){
+        GameResult resultMessage = generateResultMessage(userGame);
 
+        return UserGameResponse.builder()
+                .userGameId(userGame.getId())
+                .matchId(match.getId())
+                .matchTitle(match.getMatchTitle())
+                .predictedHomeScore(userGame.getPredictedHomeScore())
+                .predictedAwayScore(userGame.getPredictedAwayScore())
+                .actualHomeScore(match.getHomeScore())
+                .actualAwayScore(match.getAwayScore())
+                .isCorrectScore(userGame.getIsCorrectScore())
+                .isCorrectResult(userGame.getIsCorrectResult())
+                .gameResult(userGame.getGameResult())
+                .playedAt(userGame.getPlayedAt())
+                .resultMessage(resultMessage.getMessage())
+                .userGamePoints(resultMessage.getPoints())
+                .build();
+
+
+    }
+
+    private GameResult generateResultMessage(UserGame userGame){
+
+        if(userGame.getIsCorrectScore()){
+            return  GameResult.EXACT_SCORE;
+        } else if (userGame.getIsCorrectResult()){
+            return GameResult.CORRECT_RESULT;
+        } else {
+          return  GameResult.INCORRECT;
+        }
+    }
+
+    public UserGameResponse getGameResult(Long userId, Long userGameId){
+        UserGame userGame = userGameRepository.findByIdAndUserId(userGameId, userId)
+                .orElseThrow(()-> new RuntimeException("UserGame not found"));
+        return buildUserGameResponse(userGame,userGame.getMatch());
+    }
 
 }

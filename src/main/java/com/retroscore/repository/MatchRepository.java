@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MatchRepository extends JpaRepository<Match,Integer> {
+public interface MatchRepository extends JpaRepository<Match,Long> {
 
     @Query("SELECT m FROM Match m WHERE m.homeTeam.id = :teamId OR m.awayTeam.id= :teamId")
     List<Match> findByTeamId(@Param("teamId") Long teamId);

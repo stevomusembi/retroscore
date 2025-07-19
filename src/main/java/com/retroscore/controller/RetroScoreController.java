@@ -53,7 +53,7 @@ public class RetroScoreController {
     }
 
     @PostMapping("game/guess")
-    public ResponseEntity<UserGameResponse> submitGuess(@RequestParam(required = false) Long userId,  UserGuessDto userGuess) {
+    public ResponseEntity<UserGameResponse> submitGuess(@RequestParam(required = true) Long userId, @RequestBody UserGuessDto userGuess) {
         UserGameResponse response = gameService.submitGuess(userId, userGuess);
         return ResponseEntity.ok(response);
     }

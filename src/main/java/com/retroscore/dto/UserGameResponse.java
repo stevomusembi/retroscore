@@ -19,6 +19,7 @@ public class UserGameResponse {
     private LocalDateTime playedAt;
     private GameResult gameResult;
     private String resultMessage;
+    private Integer userGamePoints;
 
     public UserGameResponse() {}
 
@@ -87,6 +88,11 @@ public class UserGameResponse {
 
         public Builder resultMessage(String resultMessage) {
             response.resultMessage = resultMessage;
+            return this;
+        }
+
+        public Builder userGamePoints(Integer userGamePoints){
+            response.userGamePoints = userGamePoints;
             return this;
         }
 
