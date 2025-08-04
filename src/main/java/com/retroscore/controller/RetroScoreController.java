@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.PublicKey;
 import java.util.Map;
 import java.util.Objects;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/")
 public class RetroScoreController {
@@ -47,8 +47,11 @@ public class RetroScoreController {
     // TODO add filters for random game by season and club
 
     @GetMapping("game/random-match")
-    public ResponseEntity<MatchDto> getRandomMatch(@RequestParam(required = false) Long teamId){
-        MatchDto match = gameService.getRandomMatch(teamId);
+    public ResponseEntity<MatchDto> getRandomMatch(@RequestParam(required = false) Long userId,
+                                                   @RequestParam(required = false) Long teamId,
+                                                   @RequestParam(required = false) Long seasonId,
+                                                   @RequestParam(required = false, defaultValue="discovery") String mode){
+        MatchDto match = gameService.getRandomMatch(userId,teamId,seasonId,mode);
         return ResponseEntity.ok().body(match);
     }
 

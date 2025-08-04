@@ -1,9 +1,6 @@
 package com.retroscore.service;
 
-import com.retroscore.dto.FootballClubDto;
-import com.retroscore.dto.MatchDto;
-import com.retroscore.dto.UserGameResponse;
-import com.retroscore.dto.UserGuessDto;
+import com.retroscore.dto.*;
 import com.retroscore.entity.FootballClub;
 import com.retroscore.entity.Match;
 import com.retroscore.entity.User;
@@ -15,6 +12,8 @@ import com.retroscore.repository.MatchRepository;
 import com.retroscore.repository.UserGameRepository;
 import com.retroscore.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -30,6 +30,7 @@ public class GameService {
     private final MatchRepository matchRepository;
     private final UserGameRepository userGameRepository;
     private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
     @Autowired
     public GameService(MatchRepository matchRepository, UserGameRepository userGameRepository, UserRepository userRepository) {
@@ -38,14 +39,8 @@ public class GameService {
         this.userRepository = userRepository;
     }
 
-    public MatchDto getRandomMatch(Long teamId) {
-        List<Match> matches;
-
-        if(teamId != null){
-            matches = matchRepository.findByTeamId(teamId);
-        } else{
-            matches = matchRepository.findAll();
-        }
+    public MatchDto getRandomMatch( Long userId, Long teamId,Long seasonId, String mode) {
+        List<Match> matches = getFilteredMatches(userId,teamId,seasonId,mode);
 
         if(matches.isEmpty()){
             return null;
@@ -53,9 +48,86 @@ public class GameService {
 
         Random random =  new Random();
         Match randomMatch= matches.get(random.nextInt(matches.size()));
-        return convertMatchToDto(randomMatch);
+
+        MatchDto matchDto = convertMatchToDto(randomMatch);
+
+        if(userId!=null){
+            enrichWithPreviousPlayHistory(matchDto,userId);
+        }
+
+        return matchDto;
 
     }
+
+    private List<Match> getFilteredMatches(Long userId,Long teamId,Long seasonId,String mode){
+        logger.info("Filtering matches with parameters: userId={}, teamId={}, seasonId={}, mode={}", userId, teamId, seasonId, mode);
+
+        List<Match> matches;
+        if (teamId != null && seasonId !=null){
+            matches = matchRepository.findByTeamIdAndSeasonId(teamId,seasonId);
+        } else if (teamId !=null){
+            matches = matchRepository.findByTeamId(teamId);
+        } else if (seasonId!=null) {
+            matches = matchRepository.findBySeasonId(seasonId);
+        } else {
+            matches = matchRepository.findAll();
+        }
+
+        if(userId!= null){
+            switch (mode){
+                case "unplayed":
+                    matches = matches.stream().filter(match -> userNotPlayedMatch(userId, match.getId())).collect(Collectors.toList());
+                    break;
+                case "incorrect":
+                    matches = matches.stream()
+                            .filter(match -> wasUserIncorrectOnMatch(userId, match.getId()))
+                                    .collect(Collectors.toList());
+                    break;
+                case "discovery":
+                    List<Match> unplayedMatches  = matches.stream().filter(match -> userNotPlayedMatch(userId, match.getId())).collect(Collectors.toList());
+
+                    if(unplayedMatches.size()>=5){
+                        matches = unplayedMatches;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return matches;
+
+    }
+
+    private boolean userNotPlayedMatch(Long userId, Long matchId) {
+        return userGameRepository.findByUserIdAndMatchId(userId, matchId).isEmpty();
+    }
+
+    private boolean wasUserIncorrectOnMatch(Long userId, Long matchId){
+        Optional<UserGame> userGameOpt = userGameRepository.findByUserIdAndMatchId(userId, matchId);
+
+        if (userGameOpt.isPresent()) {
+            UserGame userGame = userGameOpt.get();
+            // User played AND got score wrong
+            return !userGame.getIsCorrectScore();
+        }
+
+        // User never played this match
+        return false;
+    }
+
+    private void enrichWithPreviousPlayHistory(MatchDto matchDto, Long userId){
+       userGameRepository.findByUserIdAndMatchId(userId,matchDto.getMatchId()).ifPresent(previousUserGame -> {
+            PlayHistoryDto previousUserGameHistory = new PlayHistoryDto();
+            previousUserGameHistory.setPreviousPlayed(true);
+            previousUserGameHistory.setWasCorrectScore(previousUserGame.getIsCorrectResult());
+            previousUserGameHistory.setWasCorrectResult(previousUserGame.getIsCorrectResult());
+           previousUserGameHistory.setPlayedAt(previousUserGame.getPlayedAt());
+
+            matchDto.setPlayHistoryDto(previousUserGameHistory);
+        });
+    }
+
     private MatchDto convertMatchToDto(Match match){
         MatchDto matchDto = new MatchDto();
         matchDto.setMatchId(match.getId());
@@ -63,8 +135,8 @@ public class GameService {
         matchDto.setHomeTeam(convertFootballClubToDto(match.getHomeTeam()));
         matchDto.setAwayTeam(convertFootballClubToDto(match.getAwayTeam()));
         matchDto.setStadiumName(match.getMatchStadiumName());
-//        matchDto.setHomeScore(match.getHomeScore());
-//        matchDto.setAwayScore(match.getAwayScore());
+        matchDto.setHomeScore(match.getHomeScore());
+        matchDto.setAwayScore(match.getAwayScore());
         matchDto.setMatchDate(match.getMatchDate());
         matchDto.setHomeCorners(match.getHomeCorners());
         matchDto.setAwayCorners(match.getAwayCorners());

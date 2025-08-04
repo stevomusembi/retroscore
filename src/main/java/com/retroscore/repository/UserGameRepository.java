@@ -10,7 +10,7 @@ public interface UserGameRepository extends JpaRepository<UserGame, Long> {
     //check if user played a game
     Optional<UserGame> findByUserIdAndMatchId(Long userId, Long matchId);
 
-    //find usergame by id and userid
+    //find userGame by id and userid
     Optional<UserGame> findByIdAndUserId(Long id, Long userId);
 
 }
