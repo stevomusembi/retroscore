@@ -9,7 +9,31 @@ public class RetroScoreApiApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(RetroScoreApiApplication.class, args);
-		System.out.println("hello world");
-	}
 
-}
+		System.out.println();
+		System.out.println("  ╔═══════════════════════╗");
+		System.out.println("  ║ ⚽ RETROSCORE API ⚽  ║");
+		System.out.println("  ╚═══════════════════════╝");
+
+        System.out.println();
+        System.out.println("     ██████████████");
+        System.out.println("   ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓██");
+        System.out.println("  ██▓▓▓▓██▓▓▓▓██▓▓▓▓██");
+        System.out.println(" ██▓▓▓▓▓▓██▓▓██▓▓▓▓▓▓██");
+        System.out.println("██▓▓▓▓▓▓▓▓████▓▓▓▓▓▓▓▓██");
+        System.out.println("██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██");
+        System.out.println("██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██");
+        System.out.println(" ██▓▓▓▓▓▓██▓▓██▓▓▓▓▓▓██");
+        System.out.println("  ██▓▓▓▓██▓▓▓▓██▓▓▓▓██");
+        System.out.println("   ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓██");
+        System.out.println("     ██████████████");
+        System.out.println();
+
+		System.out.println("  ╔══════════════════╗");
+		System.out.println("  ║   RetroScore     ║");
+		System.out.println("  ║   API Server     ║");
+		System.out.println("  ║   is Running!    ║");
+		System.out.println("  ╚══════════════════╝");
+		System.out.println();
+	}
+	}

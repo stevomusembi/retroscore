@@ -1,5 +1,6 @@
 package com.retroscore.dto;
 
+import com.retroscore.entity.Season;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ public class MatchDto {
 
     private Long matchId;
     private String matchTitle;
+    private String seasonName;
     private FootballClubDto homeTeam;
     private FootballClubDto awayTeam;
     private String stadiumName;

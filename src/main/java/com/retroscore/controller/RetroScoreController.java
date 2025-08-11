@@ -62,8 +62,7 @@ public class RetroScoreController {
     }
 
     @GetMapping("user/stats")
-    public ResponseEntity<?> getUserStats(User user){
-        Long userId = user.getId();
+    public ResponseEntity<?> getUserStats(@RequestParam(required = true) Long userId){
         return ResponseEntity.ok().body(gameService.getUserStats(userId));
     }
 

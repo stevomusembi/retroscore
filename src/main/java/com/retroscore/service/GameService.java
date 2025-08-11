@@ -132,6 +132,7 @@ public class GameService {
         MatchDto matchDto = new MatchDto();
         matchDto.setMatchId(match.getId());
         matchDto.setMatchTitle(match.getMatchTitle());
+        matchDto.setSeasonName(match.getSeason().getSeasonName());
         matchDto.setHomeTeam(convertFootballClubToDto(match.getHomeTeam()));
         matchDto.setAwayTeam(convertFootballClubToDto(match.getAwayTeam()));
         matchDto.setStadiumName(match.getMatchStadiumName());
@@ -191,6 +192,9 @@ public class GameService {
 
         UserGame savedGame =  userGameRepository.save(userGame);
 
+        // update user entity's stats
+        updateUserEntityStats(userGame);
+
         return buildUserGameResponse(savedGame, match);
     }
 
@@ -213,10 +217,43 @@ public class GameService {
         return homeScore.compareTo(awayScore);
     }
 
-    public User getUserStats(Long userId){
 
-        Optional<User> user = userRepository.findById(userId);
-        return user.orElse(null);
+    // method to update user stats after playing a game
+    private void updateUserEntityStats(UserGame userGame){
+        User user = userGame.getUser();
+        user.setGamesPlayed(user.getGamesPlayed() +1);
+        if(userGame.getIsCorrectScore()){
+            user.setGamesWon(user.getGamesWon()+1);
+
+        } else {
+            user.setGamesLost(user.getGamesLost()+1);
+        }
+        userRepository.save(user);
+    }
+
+
+    public UserDto getUserStats(Long userId){
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+       if(optionalUser.isEmpty()){
+           return null;
+       } else {
+           User user = optionalUser.get();
+           Integer totalPoints = user.getGamesWon() * 3;
+
+           UserDto userDto = new UserDto();
+           userDto.setEmail(user.getEmail());
+           userDto.setUsername(user.getUsername());
+           userDto.setMatchesPlayed(user.getGamesPlayed());
+           userDto.setWinPercentage(user.getWinPercentage());
+           userDto.setMatchesPredictedWrongScore(user.getGamesLost());
+           userDto.setMatchesPredictedCorrectScore(user.getGamesWon());
+           userDto.setTotalPoints(totalPoints);
+           userDto.setCreatedAt(user.getCreatedAt());
+           userDto.setLastLoginAt(user.getLastLogin());
+
+           return userDto;
+       }
     }
 
     private UserGameResponse buildUserGameResponse(UserGame userGame, Match match){
