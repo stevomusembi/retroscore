@@ -242,6 +242,7 @@ public class GameService {
            Integer totalPoints = user.getGamesWon() * 3;
 
            UserDto userDto = new UserDto();
+           userDto.setUserId(user.getId());
            userDto.setEmail(user.getEmail());
            userDto.setUsername(user.getUsername());
            userDto.setMatchesPlayed(user.getGamesPlayed());
