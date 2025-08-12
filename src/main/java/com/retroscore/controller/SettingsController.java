@@ -1,10 +1,8 @@
 package com.retroscore.controller;
 
 import com.retroscore.dto.UserSettingsDto;
-import com.retroscore.entity.User;
-import com.retroscore.enums.GameDifficulty;
-import com.retroscore.repository.UserRepository;
 import com.retroscore.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,57 +23,23 @@ public class SettingsController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserSettingsDto> getUSerSettings(@PathVariable Long userId){
         try {
-            User user = userService.findById(userId);
-            if(user == null){
-                return ResponseEntity.notFound().build();
-            }
-
-            log.info("user object {}", user);
-            UserSettingsDto settings = new UserSettingsDto(
-                    user.isNotificationsEnabled(),
-                    user.isMatchReminders(),
-                    user.isScoreUpdates(),
-                    user.getPreferredLeague(),
-                    user.isShowHints(),
-                    user.getGameDifficulty(),
-                    user.getTimeLimit()
-            );
-
-            return ResponseEntity.ok(settings);
-
-        } catch (Exception e){
+            UserSettingsDto userSettings = userService.getUserSettings(userId);
+            return ResponseEntity.ok(userSettings);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+
     }
 
     @PutMapping("{userId}")
     public  ResponseEntity<UserSettingsDto> updateUserSettings(@PathVariable Long userId, @RequestBody UserSettingsDto settingsDto){
         try {
-            User user = userService.findById(userId);
-            if(user == null){
-                return ResponseEntity.notFound().build();
-            }
-            user.setNotificationsEnabled(settingsDto.isNotificationsEnabled());
-            user.setMatchReminders(settingsDto.isMatchReminders());
-            user.setScoreUpdates(settingsDto.isScoreUpdates());
-            user.setPreferredLeague(settingsDto.getPreferredLeague());
-            user.setGameDifficulty(settingsDto.getGameDifficulty());
-            user.setShowHints(settingsDto.isShowHints());
-            user.setTimeLimit(settingsDto.getTimeLimit());
-
-            User updatedUser = userService.updateUser(user);
-
-            UserSettingsDto updatedSettings = new UserSettingsDto(
-                    updatedUser.isNotificationsEnabled(),
-                    updatedUser.isScoreUpdates(),
-                    updatedUser.isMatchReminders(),
-                    updatedUser.getPreferredLeague(),
-                    updatedUser.isShowHints(),
-                    updatedUser.getGameDifficulty(),
-                    updatedUser.getTimeLimit()
-            );
-           return ResponseEntity.ok(updatedSettings);
-
+           UserSettingsDto updatedSettings = userService.updateUserSettings(userId, settingsDto);
+           return  ResponseEntity.ok(updatedSettings);
+        } catch(EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
         } catch(Exception e){
             return ResponseEntity.internalServerError().build();
         }
@@ -85,38 +49,40 @@ public class SettingsController {
     public ResponseEntity<Void> updateGameDifficulty(@PathVariable Long userId,
                                                      @RequestParam String difficulty){
         try {
-            User user = userService.findById(userId);
-            if(user == null){
-                return ResponseEntity.notFound().build();
-            }
-
-            user.setGameDifficulty(GameDifficulty.valueOf(difficulty.toUpperCase()));
-            userService.updateUser(user);
+            userService.updateGameDifficulty(userId, difficulty);
             return ResponseEntity.ok().build();
-
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
         }catch (Exception e){
             return ResponseEntity.internalServerError().build();
         }
     }
 
     @PatchMapping("/{userId}/notifications")
-    public ResponseEntity<Void> updateGameDifficulty(@PathVariable Long userId,
+    public ResponseEntity<Void> updateNotifications(@PathVariable Long userId,
                                                      @RequestParam Boolean enabled ){
         try {
-            User user = userService.findById(userId);
-            if(user == null){
-                return ResponseEntity.notFound().build();
-            }
-
-          user.setNotificationsEnabled(enabled);
-            userService.updateUser(user);
+            userService.updateNotification(userId, enabled);
             return ResponseEntity.ok().build();
-
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
         }catch (Exception e){
             return ResponseEntity.internalServerError().build();
         }
     }
 
+    @PatchMapping("/{userId}/preferredLeague")
+    public ResponseEntity<Void> updatePreferredLeague(@PathVariable Long userId,
+                                                    @RequestParam String leagueId ){
+        try {
+            userService.updatePreferredLeague(userId, leagueId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
 
 

@@ -2,6 +2,7 @@ package com.retroscore.controller;
 
 
 import com.retroscore.dto.MatchDto;
+import com.retroscore.dto.UserDto;
 import com.retroscore.dto.UserGameResponse;
 import com.retroscore.dto.UserGuessDto;
 import com.retroscore.service.AuthService;
@@ -37,7 +38,7 @@ public class UserGameController {
     }
 
     @GetMapping("user/stats")
-    public ResponseEntity<?> getUserStats(@RequestParam(required = true) Long userId){
+    public ResponseEntity<UserDto> getUserStats(@RequestParam(required = true) Long userId){
         return ResponseEntity.ok().body(gameService.getUserStats(userId));
     }
 
