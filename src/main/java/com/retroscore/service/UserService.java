@@ -105,4 +105,13 @@ public class UserService {
         updateUser(user);
 
     }
+    public void updateHints(Long userId, Boolean enabled){
+        User user = findById(userId);
+        if(user == null){
+            throw new EntityNotFoundException("user not found");
+        }
+        user.setShowHints(enabled);
+        updateUser(user);
+
+    }
 }

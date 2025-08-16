@@ -85,6 +85,19 @@ public class SettingsController {
     }
 
 
+    @PatchMapping("/{userId}/hint")
+    public ResponseEntity<Void> updateHints(@PathVariable Long userId,
+                                                    @RequestParam Boolean enabled ){
+        try {
+            userService.updateHints(userId, enabled);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
 
 
