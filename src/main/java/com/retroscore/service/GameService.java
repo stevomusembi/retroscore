@@ -224,10 +224,15 @@ public class GameService {
         user.setGamesPlayed(user.getGamesPlayed() +1);
         if(userGame.getIsCorrectScore()){
             user.setGamesWon(user.getGamesWon()+1);
-
-        } else {
-            user.setGamesLost(user.getGamesLost()+1);
+            user.setExactScorePredictions(user.getExactScorePredictions()+1);
+        } else if(userGame.getIsCorrectResult()) {
+            user.setCorrectResultPredictions(user.getCorrectResultPredictions()+1);
+            user.setGamesDrawn(user.getGamesDrawn()+1);
         }
+        else {
+                user.setGamesLost(user.getGamesLost()+1);
+        }
+
         userRepository.save(user);
     }
 

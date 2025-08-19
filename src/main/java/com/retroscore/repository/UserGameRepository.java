@@ -3,6 +3,7 @@ package com.retroscore.repository;
 import com.retroscore.entity.UserGame;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserGameRepository extends JpaRepository<UserGame, Long> {
@@ -12,5 +13,7 @@ public interface UserGameRepository extends JpaRepository<UserGame, Long> {
 
     //find userGame by id and userid
     Optional<UserGame> findByIdAndUserId(Long id, Long userId);
+
+    List<UserGame> findByUserId(Long userId);
 
 }
