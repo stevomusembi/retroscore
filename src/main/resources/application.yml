@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/retroscore
-    username: retroscore_admin
-    password: admin
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     security:
       user:
@@ -41,6 +41,6 @@ logging:
     org.springframework.web: DEBUG
     com.retroscore: DEBUG
 jwt:
-  secret: "tpP7rIm8TVSVlsVaRyWl3feSLXT3AXrnABHlqqQ9SUl4MeUM5nPhaNSIkZZjzBVZ7izulkP5lsIz1VbnetQGw4oRVt7swop4l8rl65K7DNU5HkV8dOfc9EzhNPGloika"
+  secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds
   refresh-expiration: 604800000  # 7 days in milliseconds

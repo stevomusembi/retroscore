@@ -22,27 +22,27 @@ public class AuthService {
 
     }
 
-    public void register(User user) {
-        String username = user.getUsername();
-        String passwordHash = user.getPasswordHash();
-
-        if(userRepository.existsByUsername(username)){
-            throw new ConflictException("username already exists");
-        }
-        if(username != null && passwordHash!= null && passwordHash.length() > 8 && !username.isEmpty()){
-            userRepository.save(user);
-        }
-    }
-
-    public User login(User user){
-        String username = user.getUsername();
-        String password = user.getPasswordHash();
-
-        Optional<User> optionalUser = userRepository.findByUsernameAndPasswordHash(username, password);
-        if(optionalUser.isPresent()){
-            return optionalUser.get();
-        } else {
-            throw new UnauthorizedException("Check username and try again");
-        }
-    }
+//    public void register(User user) {
+//        String username = user.getUsername();
+//        String passwordHash = user.getPasswordHash();
+//
+//        if(userRepository.existsByUsername(username)){
+//            throw new ConflictException("username already exists");
+//        }
+//        if(username != null && passwordHash!= null && passwordHash.length() > 8 && !username.isEmpty()){
+//            userRepository.save(user);
+//        }
+//    }
+//
+//    public User login(User user){
+//        String username = user.getUsername();
+//        String password = user.getPasswordHash();
+//
+//        Optional<User> optionalUser = userRepository.findByUsernameAndPasswordHash(username, password);
+//        if(optionalUser.isPresent()){
+//            return optionalUser.get();
+//        } else {
+//            throw new UnauthorizedException("Check username and try again");
+//        }
+//    }
 }
