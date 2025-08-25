@@ -20,8 +20,19 @@ public class User {
     @Column(unique = true,nullable = false)
     private String email;
 
+/*
     @Column(nullable = false)
     private String passwordHash;
+*/
+
+    @Column(name="google_id", nullable = true, unique = true)
+    private String googleId;
+
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
+    @Column(name = "is_email_verified")
+    private boolean isEmailVerified = false;
 
     @Column(name = "games_played", nullable = false)
     private Integer gamesPlayed = 0;
@@ -95,7 +106,7 @@ public class User {
     public User(String username, String email, String passwordHash) {
         this.username = username;
         this.email = email;
-        this.passwordHash = passwordHash;
+//        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
         this.lastLogin = LocalDateTime.now();
 
