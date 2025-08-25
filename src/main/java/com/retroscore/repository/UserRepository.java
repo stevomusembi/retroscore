@@ -33,4 +33,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "FROM User u WHERE u.id = :userId")
     Object[] findUserWithRank(@Param("userId") Long userId);
 
+    //find by googleId
+    Optional<User> findByGoogleId(String googleId);
+
+    //findBy email
+    Optional<User> findByEmail(String email);
+
+
 }
