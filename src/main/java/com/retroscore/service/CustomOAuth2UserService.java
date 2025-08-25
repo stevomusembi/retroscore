@@ -3,21 +3,21 @@ package com.retroscore.service;
 import com.retroscore.entity.User;
 import com.retroscore.enums.GameDifficulty;
 import com.retroscore.repository.UserRepository;
+import com.retroscore.security.UserPrincipal;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-public class OAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
 
-    public OAuth2UserService(UserRepository userRepository) {
+    public CustomOAuth2UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -27,7 +27,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         User user = processOAuth2User(oAuth2User);
 
-        return new UserPrincipal(user, oAuth2User.getAttributes());
+        return  new UserPrincipal(user,oAuth2User.getAttributes());
     }
 
     private User processOAuth2User(OAuth2User oAuth2User){
