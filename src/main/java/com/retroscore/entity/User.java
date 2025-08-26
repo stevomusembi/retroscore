@@ -20,6 +20,26 @@ public class User {
     @Column(unique = true,nullable = false)
     private String email;
 
+    @Column(name = "provider")
+    private String provider;
+
+    // Name fields (if not already present)
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "name")
+    private String name; // Full name from Google
+
+    // Account status fields (if not already present)
+    @Column(name = "active")
+    private boolean active = true;
+
+    @Column(name = "account_non_locked")
+    private boolean accountNonLocked = true;
+
 /*
     @Column(nullable = false)
     private String passwordHash;
@@ -54,6 +74,9 @@ public class User {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;

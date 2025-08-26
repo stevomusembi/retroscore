@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByUsernameAndPasswordHash(String username, String passwordHash);
+//    Optional<User> findByUsernameAndPasswordHash(String username, String passwordHash);
 
     Boolean existsByUsername(String username);
 
@@ -40,4 +40,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
 
+    Optional<User> findByUsername(String username);
+
+    // Optional: Check if email exists (useful for validation)
+    boolean existsByEmail(String email);
+
+    // Optional: Check if Google ID exists (useful for validation)
+    boolean existsByGoogleId(String googleId);
 }
