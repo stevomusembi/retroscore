@@ -27,6 +27,7 @@ public class UserGameController {
                                                    @RequestParam(required = false) Long teamId,
                                                    @RequestParam(required = false) Long seasonId,
                                                    @RequestParam(required = false, defaultValue="discovery") String mode){
+        System.out.println("got here to the request");
         MatchDto match = gameService.getRandomMatch(userId,teamId,seasonId,mode);
         return ResponseEntity.ok().body(match);
     }

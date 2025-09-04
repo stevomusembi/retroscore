@@ -22,7 +22,12 @@ public class GoogleTokenValidatorService {
     private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo?access_token=";
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String googleClientId;
+    private String webClientId;
+
+    // Add Android client ID as well
+    @Value("${spring.security.oauth2.client.registration.google.android-client-id:}")
+    private String androidClientId;
+
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -59,6 +64,14 @@ public class GoogleTokenValidatorService {
         }
     }
 
+    /** check audience equal to either
+      *  web or android client id
+     */
+    private boolean isValidAudience(String audience) {
+        return audience.equals(webClientId) ||
+                (audience.equals(androidClientId));
+    }
+
     /**
      * Validates token using Google's tokenInfo endpoint
      * @param accessToken Google access token
@@ -86,8 +99,8 @@ public class GoogleTokenValidatorService {
             // Validate audience (client_id) - security check
             if (jsonResponse.has("audience")) {
                 String audience = jsonResponse.get("audience").asText();
-                if (!audience.equals(googleClientId)) {
-                    logger.warn("Token audience mismatch. Expected: {}, Got: {}", googleClientId, audience);
+                if (!isValidAudience(audience)) {
+                    logger.warn("Token audience mismatch. Expected: {} or {}, Got: {}", webClientId,androidClientId, audience);
                     return false;
                 }
             }

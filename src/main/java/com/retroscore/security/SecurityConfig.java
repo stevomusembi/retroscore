@@ -1,6 +1,7 @@
 package com.retroscore.security;
 
 import com.retroscore.service.CustomOAuth2UserService;
+import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,6 +30,9 @@ public class SecurityConfig {
     @Autowired
     private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
+    @Autowired
+    private OptionalJWTAuthenticationFilter optionalJwtAuthenticationFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -37,23 +42,26 @@ public class SecurityConfig {
                 // Configure CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Configure session management (stateless for JWT)
+                // Configure session management (stateless for JWT, but allow sessions for web OAuth2)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 // Configure URL authorization
                 .authorizeHttpRequests(auth -> auth
-                        // Allow OAuth2 endpoints (needed for web authentication flow)
+                        // Allow OAuth2 endpoints (needed for WEB authentication flow)
                         .requestMatchers(
                                 "/oauth2/**",
-                                "/login/oauth2/code/**"
+                                "/login/oauth2/code/**",
+                                "/login**",
+                                "/error**"
                         ).permitAll()
 
-                        // Allow mobile authentication endpoints (no auth required)
+                        // Allow MOBILE authentication endpoints (no auth required)
                         .requestMatchers(
                                 "/auth/google/mobile",
                                 "/auth/validate",
-                                "/auth/refresh"
+                                "/auth/refresh",
+                                "/auth/guest"
                         ).permitAll()
 
                         // Allow public API endpoints (health checks, etc.)
@@ -62,17 +70,33 @@ public class SecurityConfig {
                                 "/api/public/**"
                         ).permitAll()
 
-                        // Protected endpoints (require JWT authentication)
+                        // Mixed access endpoints (authenticated + anonymous)
                         .requestMatchers(
+                                "/api/game/**",           // Game endpoints
+                                "/api/matches/**",        // Browse matches
+                                "/api/leaderboard/public" // Public leaderboard
+                        ).permitAll()  // Allow both authenticated and anonymous
+
+                        // WEB-only protected endpoints (require OAuth2 session OR JWT)
+                        .requestMatchers(
+                                "/dashboard/**",          // Web dashboard
+                                "/profile/**"             // Web profile pages
+                        ).authenticated()
+
+                        // API-only protected endpoints (require JWT)
+                        .requestMatchers(
+                                "/api/user/**",           // User profile API
+                                "/api/game/save-progress", // Save game progress
+                                "/api/leaderboard/personal", // Personal stats
                                 "/auth/me",
                                 "/auth/logout"
                         ).authenticated()
 
-                        // All other API requests require authentication
+                        // All other requests require authentication
                         .anyRequest().authenticated()
                 )
 
-                // Configure OAuth2 Login
+                // Configure OAuth2 Login (for WEB users)
                 .oauth2Login(oauth2 -> oauth2
                         // Set the login page (optional, defaults to /oauth2/authorization/{registrationId})
                         .loginPage("/oauth2/authorization/google")
@@ -87,52 +111,47 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
 
-                        // Configure success handler (generates JWT and redirects to mobile app)
+                        // Configure success handler (for WEB - creates session/JWT and redirects)
                         .successHandler(oAuth2AuthenticationSuccessHandler)
 
-                        // Configure failure handler (redirects to mobile app with error)
+                        // Configure failure handler (for WEB - redirects with error)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
-
                 )
+
+                // Add JWT filter for API requests (doesn't interfere with OAuth2 sessions)
+                .addFilterBefore((Filter) optionalJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .build();
     }
 
-    /**
-     * CORS configuration to allow requests from your mobile app and development servers
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow specific origins (add your development/production domains)
+        // Allow specific origins
         configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",     // Local development
-                "https://*.expo.dev",     // Expo development
-                "https://*.netlify.app",  // If you have a web version
-                "https://*.vercel.app",   // If you use Vercel
-                "capacitor://localhost",  // If using Capacitor
-                "ionic://localhost",      // If using Ionic
-                "retroscoreapp://*",      // Your custom deep link scheme
-                "exp://*"                 // Expo development URLs
+                "http://localhost:*",         // Local development
+                "https://yourdomain.com",     // Your web app domain
+                "https://*.expo.dev",         // Expo development
+                "https://*.netlify.app",      // If you have a web version
+                "https://*.vercel.app",       // If you use Vercel
+                "capacitor://localhost",      // If using Capacitor
+                "ionic://localhost",          // If using Ionic
+                "retroscoreapp://*",          // Your custom deep link scheme
+                "exp://*"                     // Expo development URLs
         ));
 
-        // Allow specific HTTP methods
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
-        // Allow specific headers
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization", "Content-Type", "X-Requested-With",
                 "Accept", "Origin", "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
         ));
 
-        // Allow credentials (important for OAuth2)
         configuration.setAllowCredentials(true);
-
-        // Set max age for preflight requests
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

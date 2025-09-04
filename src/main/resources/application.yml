@@ -13,6 +13,7 @@ spring:
       client:
         registration:
           google:
+            android-client-id: ${GOOGLE_ANDROID_CLIENT_ID}
             client-id: ${GOOGLE_WEB_CLIENT_ID}
             client-secret: ${GOOGLE_WEB_CLIENT_SECRET}
             scope:
@@ -60,8 +61,6 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds
   refresh-expiration: 604800000  # 7 days in milliseconds
-
-app:
-   oauth2:
-     redirect-uri: retroscoreapp://auth/success
-     error-redirect-uri: retroscoreapp://auth/error
+devtools:
+  restart:
+    enabled: false

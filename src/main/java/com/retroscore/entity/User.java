@@ -3,8 +3,10 @@ package com.retroscore.entity;
 import com.retroscore.enums.GameDifficulty;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Data
@@ -126,12 +128,16 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String passwordHash) {
+    public User(String username, String email) {
         this.username = username;
         this.email = email;
 //        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
         this.lastLogin = LocalDateTime.now();
 
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 }

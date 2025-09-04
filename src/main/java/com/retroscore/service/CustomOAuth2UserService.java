@@ -1,9 +1,12 @@
 package com.retroscore.service;
 
+import com.retroscore.controller.AuthController;
 import com.retroscore.entity.User;
 import com.retroscore.enums.GameDifficulty;
 import com.retroscore.repository.UserRepository;
 import com.retroscore.security.UserPrincipal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,6 +19,7 @@ import java.util.Optional;
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(CustomOAuth2UserService.class);
 
     public CustomOAuth2UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -44,6 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if(existingUserByGoogleId.isPresent()){
             User existingUser = existingUserByGoogleId.get();
+
             return updateExistingUser(existingUser, oAuth2User);
         }
 
@@ -81,6 +86,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
          newUser.setMatchReminders(true);
          newUser.setScoreUpdates(true);
 
+         log.info("New user created via Google OAuth: {}", email);
+
+
          return userRepository.save(newUser);
      }
 
@@ -99,6 +107,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
          existingUser.setLastLogin(LocalDateTime.now());
 
+
+         log.info("User logged in via Google OAuth: {}", emailVerified);
          return userRepository.save(existingUser);
 
      }
@@ -130,65 +140,4 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
          return username;
 
      }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

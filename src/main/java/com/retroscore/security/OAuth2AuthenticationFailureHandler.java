@@ -12,18 +12,15 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationFailureHandler.class);
 
-    // This should match your Expo app's deep link scheme for errors
-    // Configure this in application.properties: app.oauth2.error-redirect-uri=myapp://auth/error
-    @Value("${app.oauth2.error-redirect-uri:myapp://auth/error}")
-    private String errorRedirectUri;
+    // Web app frontend URL (for fallback)
+    @Value("${app.web.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
@@ -36,22 +33,154 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
         String errorMessage = determineErrorMessage(exception);
         String errorCode = determineErrorCode(exception);
 
-        logger.info("Redirecting to error page with message: {} (code: {})", errorMessage, errorCode);
+        logger.info("Authentication failed with message: {} (code: {})", errorMessage, errorCode);
 
         try {
-            // Build error redirect URL
-            String targetUrl = buildErrorUrl(errorCode, errorMessage, exception);
-
-            // Redirect to Expo app with error information
-            response.sendRedirect(targetUrl);
+            // This handler is only used for web popup authentication
+            // Mobile apps use the direct API endpoints and handle errors there
+            handlePopupFailure(response, errorCode, errorMessage);
 
         } catch (Exception e) {
             logger.error("Error during authentication failure handling", e);
-
-            // Last resort fallback
-            String fallbackUrl = errorRedirectUri + "?error=unknown&message=Authentication failed";
-            response.sendRedirect(fallbackUrl);
+            handlePopupFallback(response, "Authentication failed");
         }
+    }
+
+    /**
+     * Handle popup failure for web app
+     */
+    private void handlePopupFailure(HttpServletResponse response, String errorCode, String errorMessage) throws IOException {
+        logger.info("Handling popup failure with code: {} and message: {}", errorCode, errorMessage);
+
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+
+        String html = String.format("""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Login Error</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                        background-color: #f5f5f5;
+                    }
+                    .message {
+                        text-align: center;
+                        padding: 20px;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        max-width: 400px;
+                    }
+                    .error { 
+                        color: #d32f2f; 
+                        margin-bottom: 15px;
+                    }
+                    .error-code {
+                        font-family: monospace;
+                        background: #f5f5f5;
+                        padding: 5px 10px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        color: #666;
+                        margin-top: 10px;
+                    }
+                    .close-instruction {
+                        margin-top: 15px;
+                        color: #666;
+                        font-size: 14px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="message">
+                    <h2 class="error">Login Failed</h2>
+                    <p>%s</p>
+                    <div class="error-code">Error Code: %s</div>
+                    <p class="close-instruction">You can close this window and try again.</p>
+                </div>
+                <script>
+                    console.log('Popup authentication failed:', {
+                        code: '%s',
+                        message: '%s'
+                    });
+                    
+                    try {
+                        // Send error data to parent window
+                        if (window.opener && !window.opener.closed) {
+                            console.log('Sending error message to parent window');
+                            window.opener.postMessage({
+                                type: 'GOOGLE_LOGIN_ERROR',
+                                code: '%s',
+                                message: '%s'
+                            }, '*');
+                            
+                            // Close popup after delay to allow user to read message
+                            setTimeout(() => {
+                                window.close();
+                            }, 3000);
+                        } else {
+                            console.log('No parent window found');
+                            // If no parent window, redirect to web app login with error
+                            setTimeout(() => {
+                                window.location.href = '%s/login?error=' + encodeURIComponent('%s');
+                            }, 5000);
+                        }
+                    } catch (error) {
+                        console.error('Error communicating with parent:', error);
+                    }
+                </script>
+            </body>
+            </html>
+            """,
+                errorMessage, errorCode,  // For HTML display
+                errorCode, errorMessage,  // For console logging
+                errorCode, errorMessage,  // For postMessage
+                frontendUrl, errorMessage  // For fallback redirect
+        );
+
+        response.getWriter().write(html);
+    }
+
+    /**
+     * Handle popup fallback when other error handling fails
+     */
+    private void handlePopupFallback(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+
+        String html = String.format("""
+            <!DOCTYPE html>
+            <html>
+            <head><title>Authentication Error</title></head>
+            <body>
+                <h2>Authentication Failed</h2>
+                <p>%s</p>
+                <p><small>Please close this window and try again.</small></p>
+                <script>
+                    try {
+                        if (window.opener && !window.opener.closed) {
+                            window.opener.postMessage({
+                                type: 'GOOGLE_LOGIN_ERROR',
+                                message: '%s'
+                            }, '*');
+                            setTimeout(() => window.close(), 2000);
+                        }
+                    } catch (e) {
+                        console.error('Communication error:', e);
+                    }
+                </script>
+            </body>
+            </html>
+            """, message, message);
+
+        response.getWriter().write(html);
     }
 
     /**
@@ -103,35 +232,5 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
             case "DisabledException" -> "account_disabled";
             default -> "authentication_error";
         };
-    }
-
-    /**
-     * Builds the error redirect URL with error details
-     */
-    private String buildErrorUrl(String errorCode, String errorMessage, AuthenticationException exception) {
-        try {
-            String encodedMessage = URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
-            String encodedCode = URLEncoder.encode(errorCode, StandardCharsets.UTF_8);
-
-            StringBuilder urlBuilder = new StringBuilder(errorRedirectUri)
-                    .append("?error=").append(encodedCode)
-                    .append("&message=").append(encodedMessage);
-
-            // Add timestamp for debugging
-            urlBuilder.append("&timestamp=").append(System.currentTimeMillis());
-
-            // Add exception type for debugging (optional)
-            if (logger.isDebugEnabled()) {
-                String exceptionType = URLEncoder.encode(exception.getClass().getSimpleName(), StandardCharsets.UTF_8);
-                urlBuilder.append("&type=").append(exceptionType);
-            }
-
-            return urlBuilder.toString();
-
-        } catch (Exception e) {
-            logger.error("Error building error URL", e);
-            // Fallback to simple error URL
-            return errorRedirectUri + "?error=unknown&message=Authentication failed";
-        }
     }
 }
