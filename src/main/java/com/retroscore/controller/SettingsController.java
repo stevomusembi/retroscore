@@ -1,10 +1,12 @@
 package com.retroscore.controller;
 
 import com.retroscore.dto.UserSettingsDto;
+import com.retroscore.security.UserPrincipal;
 import com.retroscore.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -20,9 +22,10 @@ public class SettingsController {
         this.userService = userService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserSettingsDto> getUSerSettings(@PathVariable Long userId){
+    @GetMapping
+    public ResponseEntity<UserSettingsDto> getUSerSettings(@AuthenticationPrincipal UserPrincipal principal){
         try {
+            Long userId = principal.getUserId();
             UserSettingsDto userSettings = userService.getUserSettings(userId);
             return ResponseEntity.ok(userSettings);
         } catch (EntityNotFoundException e) {
@@ -33,9 +36,10 @@ public class SettingsController {
 
     }
 
-    @PutMapping("{userId}")
-    public  ResponseEntity<UserSettingsDto> updateUserSettings(@PathVariable Long userId, @RequestBody UserSettingsDto settingsDto){
+    @PutMapping
+    public  ResponseEntity<UserSettingsDto> updateUserSettings(@AuthenticationPrincipal UserPrincipal principal, @RequestBody UserSettingsDto settingsDto){
         try {
+           Long userId = principal.getUserId();
            UserSettingsDto updatedSettings = userService.updateUserSettings(userId, settingsDto);
            return  ResponseEntity.ok(updatedSettings);
         } catch(EntityNotFoundException e){
@@ -45,10 +49,11 @@ public class SettingsController {
         }
     }
 
-    @PatchMapping("/{userId}/difficulty")
-    public ResponseEntity<Void> updateGameDifficulty(@PathVariable Long userId,
+    @PatchMapping("/difficulty")
+    public ResponseEntity<Void> updateGameDifficulty(@AuthenticationPrincipal UserPrincipal principal,
                                                      @RequestParam String difficulty){
         try {
+            Long userId = principal.getUserId();
             userService.updateGameDifficulty(userId, difficulty);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){
@@ -58,10 +63,11 @@ public class SettingsController {
         }
     }
 
-    @PatchMapping("/{userId}/notifications")
-    public ResponseEntity<Void> updateNotifications(@PathVariable Long userId,
+    @PatchMapping("/notifications")
+    public ResponseEntity<Void> updateNotifications(@AuthenticationPrincipal UserPrincipal principal,
                                                      @RequestParam Boolean enabled ){
         try {
+            Long userId = principal.getUserId();
             userService.updateNotification(userId, enabled);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){
@@ -71,10 +77,11 @@ public class SettingsController {
         }
     }
 
-    @PatchMapping("/{userId}/preferredLeague")
-    public ResponseEntity<Void> updatePreferredLeague(@PathVariable Long userId,
+    @PatchMapping("/preferredLeague")
+    public ResponseEntity<Void> updatePreferredLeague(@AuthenticationPrincipal UserPrincipal principal,
                                                     @RequestParam String leagueId ){
         try {
+            Long userId = principal.getUserId();
             userService.updatePreferredLeague(userId, leagueId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){
@@ -85,10 +92,11 @@ public class SettingsController {
     }
 
 
-    @PatchMapping("/{userId}/hint")
-    public ResponseEntity<Void> updateHints(@PathVariable Long userId,
+    @PatchMapping("/hint")
+    public ResponseEntity<Void> updateHints(@AuthenticationPrincipal UserPrincipal principal,
                                                     @RequestParam Boolean enabled ){
         try {
+            Long userId = principal.getUserId();
             userService.updateHints(userId, enabled);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){

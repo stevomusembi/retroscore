@@ -4,11 +4,28 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-    security:
-      user:
-        name: user
-        password: test
-        roles: USER
+  security:
+    user:
+      name: user
+      password: test
+      roles: USER
+    oauth2:
+      client:
+        registration:
+          google:
+            android-client-id: ${GOOGLE_ANDROID_CLIENT_ID}
+            client-id: ${GOOGLE_WEB_CLIENT_ID}
+            client-secret: ${GOOGLE_WEB_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+    provider:
+      google:
+        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+        token-uri: https://www.googleapis.com/oauth2/v4/token
+        user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+        user-name-attribute: sub
 
   jpa:
     hibernate:
@@ -44,3 +61,6 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds
   refresh-expiration: 604800000  # 7 days in milliseconds
+devtools:
+  restart:
+    enabled: false

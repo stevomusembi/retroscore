@@ -3,8 +3,10 @@ package com.retroscore.entity;
 import com.retroscore.enums.GameDifficulty;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Data
@@ -19,6 +21,26 @@ public class User {
 
     @Column(unique = true,nullable = false)
     private String email;
+
+    @Column(name = "provider")
+    private String provider;
+
+    // Name fields (if not already present)
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "name")
+    private String name; // Full name from Google
+
+    // Account status fields (if not already present)
+    @Column(name = "active")
+    private boolean active = true;
+
+    @Column(name = "account_non_locked")
+    private boolean accountNonLocked = true;
 
 /*
     @Column(nullable = false)
@@ -54,6 +76,9 @@ public class User {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
@@ -103,12 +128,16 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String passwordHash) {
+    public User(String username, String email) {
         this.username = username;
         this.email = email;
 //        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
         this.lastLogin = LocalDateTime.now();
 
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 }

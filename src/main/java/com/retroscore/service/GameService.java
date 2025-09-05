@@ -7,6 +7,7 @@ import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
 import com.retroscore.enums.GameResult;
 import com.retroscore.exception.MatchNotFoundException;
+import com.retroscore.exception.NoMatchesFoundException;
 import com.retroscore.exception.UserAlreadyPlayedException;
 import com.retroscore.repository.MatchRepository;
 import com.retroscore.repository.UserGameRepository;
@@ -31,6 +32,7 @@ public class GameService {
     private final UserGameRepository userGameRepository;
     private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(GameService.class);
+    private static final Random RANDOM = new Random();
 
     @Autowired
     public GameService(MatchRepository matchRepository, UserGameRepository userGameRepository, UserRepository userRepository) {
@@ -39,24 +41,25 @@ public class GameService {
         this.userRepository = userRepository;
     }
 
-    public MatchDto getRandomMatch( Long userId, Long teamId,Long seasonId, String mode) {
-        List<Match> matches = getFilteredMatches(userId,teamId,seasonId,mode);
-
-        if(matches.isEmpty()){
-            return null;
+    public MatchDto getRandomMatch(Long userId, Long teamId, Long seasonId, String mode) {
+        if (mode == null || mode.isBlank()) {
+            mode = "discovery";
         }
 
-        Random random =  new Random();
-        Match randomMatch= matches.get(random.nextInt(matches.size()));
+        List<Match> matches = getFilteredMatches(userId, teamId, seasonId, mode);
 
+        if (matches.isEmpty()) {
+            throw new NoMatchesFoundException();
+        }
+
+        Match randomMatch = matches.get(RANDOM.nextInt(matches.size()));
         MatchDto matchDto = convertMatchToDto(randomMatch);
 
-        if(userId!=null){
-            enrichWithPreviousPlayHistory(matchDto,userId);
+        if (userId != null) {
+            enrichWithPreviousPlayHistory(matchDto, userId);
         }
 
         return matchDto;
-
     }
 
     private List<Match> getFilteredMatches(Long userId,Long teamId,Long seasonId,String mode){
