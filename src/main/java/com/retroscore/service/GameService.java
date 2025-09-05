@@ -7,6 +7,7 @@ import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
 import com.retroscore.enums.GameResult;
 import com.retroscore.exception.MatchNotFoundException;
+import com.retroscore.exception.NoMatchesFoundException;
 import com.retroscore.exception.UserAlreadyPlayedException;
 import com.retroscore.repository.MatchRepository;
 import com.retroscore.repository.UserGameRepository;
@@ -48,7 +49,7 @@ public class GameService {
         List<Match> matches = getFilteredMatches(userId, teamId, seasonId, mode);
 
         if (matches.isEmpty()) {
-            return null; // Or throw a custom exception
+            throw new NoMatchesFoundException();
         }
 
         Match randomMatch = matches.get(RANDOM.nextInt(matches.size()));
