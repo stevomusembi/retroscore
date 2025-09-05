@@ -42,7 +42,7 @@ public class OptionalJWTAuthenticationFilter extends OncePerRequestFilter{
 
                 // Validate token
                 if (!jwtService.isTokenExpired(token)) {
-                    String userEmail = jwtService.getUsernameFromToken(token);
+                    String userEmail = jwtService.getEmailFromToken(token);
 
                     if (userEmail != null) {
                         User user = userService.findByEmail(userEmail);

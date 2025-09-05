@@ -1,6 +1,7 @@
 package com.retroscore.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,5 +31,10 @@ public class ExceptionAndErrorController {
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleUserAlreadyPlayedException(UserAlreadyPlayedException ex){
         return ex.getMessage();
+    }
+
+    @ExceptionHandler(NoMatchesFoundException.class)
+    public ResponseEntity<String> handleMatchNotFoundWithFilters(NoMatchesFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
