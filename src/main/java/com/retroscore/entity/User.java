@@ -1,6 +1,7 @@
 package com.retroscore.entity;
 
 import com.retroscore.enums.GameDifficulty;
+import com.retroscore.enums.TimerDurations;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,7 +26,6 @@ public class User {
     @Column(name = "provider")
     private String provider;
 
-    // Name fields (if not already present)
     @Column(name = "first_name")
     private String firstName;
 
@@ -33,19 +33,13 @@ public class User {
     private String lastName;
 
     @Column(name = "name")
-    private String name; // Full name from Google
+    private String name;
 
-    // Account status fields (if not already present)
     @Column(name = "active")
     private boolean active = true;
 
     @Column(name = "account_non_locked")
     private boolean accountNonLocked = true;
-
-/*
-    @Column(nullable = false)
-    private String passwordHash;
-*/
 
     @Column(name="google_id", nullable = true, unique = true)
     private String googleId;
@@ -65,11 +59,9 @@ public class User {
     @Column(name = "games_lost", nullable = false)
     private  Integer gamesLost = 0;
 
-    // to represent when get correct result but not exact correct score
     @Column(name = "games_draw", nullable = false)
     private  Integer gamesDrawn = 0;
 
-    //Win percentage
     public  Double getWinPercentage(){
         return gamesPlayed > 0 ? (gamesWon * 100)/ gamesPlayed : 0.0;
     }
@@ -102,8 +94,9 @@ public class User {
     @Column(name = "show_hints")
     private  boolean showHints = true;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "time_limit")
-    private int timeLimit = 5;
+    private TimerDurations timeLimit = TimerDurations.getDefault();
 
     @Column(name = "total_points", nullable = false)
     private Integer totalPoints = 0;
@@ -114,16 +107,13 @@ public class User {
     @Column(name = "correct_result_predictions", nullable = false)
     private Integer correctResultPredictions = 0;
 
+    /**
+     Exact score = 3 points(win)
+     Correct result = 1 point(draw)
+     */
     public Integer calculateTotalPoints() {
-        // Exact score = 3 points
-        // Correct result = 1 point
         return (exactScorePredictions * 3) + (correctResultPredictions);
     }
-
-    // Update win percentage calculation to be more accurate
-//    public Double getWinPercentage() {
-//        return gamesPlayed > 0 ? ((double) gamesWon / gamesPlayed) * 100.0 : 0.0;
-//    }
 
     public User() {
     }
@@ -131,7 +121,6 @@ public class User {
     public User(String username, String email) {
         this.username = username;
         this.email = email;
-//        this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
         this.lastLogin = LocalDateTime.now();
 

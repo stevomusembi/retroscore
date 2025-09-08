@@ -37,7 +37,8 @@ public class SettingsController {
     }
 
     @PutMapping
-    public  ResponseEntity<UserSettingsDto> updateUserSettings(@AuthenticationPrincipal UserPrincipal principal, @RequestBody UserSettingsDto settingsDto){
+    public  ResponseEntity<UserSettingsDto> updateUserSettings(@AuthenticationPrincipal UserPrincipal principal,
+                                                               @RequestBody UserSettingsDto settingsDto){
         try {
            Long userId = principal.getUserId();
            UserSettingsDto updatedSettings = userService.updateUserSettings(userId, settingsDto);

@@ -3,6 +3,7 @@ package com.retroscore.service;
 import com.retroscore.controller.AuthController;
 import com.retroscore.entity.User;
 import com.retroscore.enums.GameDifficulty;
+import com.retroscore.enums.TimerDurations;
 import com.retroscore.repository.UserRepository;
 import com.retroscore.security.UserPrincipal;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
          newUser.setCorrectResultPredictions(0);
          newUser.setGameDifficulty(GameDifficulty.MEDIUM);
          newUser.setPreferredLeague("ALL");
-         newUser.setTimeLimit(5);
+         newUser.setTimeLimit(TimerDurations.getDefault());
          newUser.setShowHints(true);
          newUser.setNotificationsEnabled(true);
          newUser.setMatchReminders(true);
