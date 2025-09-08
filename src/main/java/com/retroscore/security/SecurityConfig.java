@@ -74,7 +74,10 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/game/**",           // Game endpoints
                                 "/api/matches/**",        // Browse matches
-                                "/api/leaderboard/public" // Public leaderboard
+                                "/api/leaderboard/public", // public leaderboard
+                                "/static/**", // Public static files
+                                "/logos/**" // Allow logos without auth
+
                         ).permitAll()  // Allow both authenticated and anonymous
 
                         // WEB-only protected endpoints (require OAuth2 session OR JWT)
