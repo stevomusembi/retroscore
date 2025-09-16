@@ -172,8 +172,27 @@ public class GameService {
         // validate user exists
         User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User not found"));
 
+
         // validate the match exists
         Match match = matchRepository.findById(userGuess.getMatchId()).orElseThrow(()-> new MatchNotFoundException(userGuess.getMatchId()));
+
+        // user failed to submit a guess in time, we don't record it as a user game
+        if (userGuess.getTimeIsUp() == true){
+            return UserGameResponse.builder()
+                    .matchId(match.getId())
+                    .matchTitle(match.getMatchTitle())
+                    .actualHomeScore(match.getHomeScore())
+                    .actualAwayScore(match.getAwayScore())
+                    .isCorrectScore(false)
+                    .isCorrectResult(false)
+                    .gameResult(GameResult.INCORRECT)
+                    .playedAt(LocalDateTime.now())
+                    .resultMessage(GameResult.TIMEUP.getMessage())
+                    .userGamePoints(GameResult.TIMEUP.getPoints())
+                    .build();
+
+        }
+
 
         // check if user has played the specific match before
         Optional<UserGame> existingUserGame = userGameRepository.findByUserIdAndMatchId(userId, match.getId());

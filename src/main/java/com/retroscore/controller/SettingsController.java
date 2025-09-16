@@ -64,6 +64,20 @@ public class SettingsController {
         }
     }
 
+    @PatchMapping("/timeLimit")
+    public ResponseEntity<Void> updateTimeLimit(@AuthenticationPrincipal UserPrincipal principal,
+                                                     @RequestParam String timeLimit){
+        try {
+            Long userId = principal.getUserId();
+            userService.updateTimeLimit(userId, timeLimit);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PatchMapping("/notifications")
     public ResponseEntity<Void> updateNotifications(@AuthenticationPrincipal UserPrincipal principal,
                                                      @RequestParam Boolean enabled ){
