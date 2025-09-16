@@ -85,6 +85,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         userData.put("email", user.getEmail());
         userData.put("username", user.getUsername() != null ? user.getUsername() : "");
         userData.put("id", user.getId());
+        userData.put("time_limit", user.getTimeLimit());
 
         try {
             String userDataJson = objectMapper.writeValueAsString(userData);

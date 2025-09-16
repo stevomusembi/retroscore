@@ -18,12 +18,15 @@ public class UserGuessDto {
     @Min(value = 0,message = "Away score must be non negative")
     private Integer predictedAwayScore;
 
+    private Boolean timeIsUp = false;
+
     public UserGuessDto(){}
 
-    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore){
+    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp){
         this.matchId = matchId;
         this.predictedHomeScore = predictedHomeScore;
         this.predictedAwayScore = predictedAwayScore;
+        this.timeIsUp = timeIsUp;
     }
 
     @Override
@@ -32,6 +35,7 @@ public class UserGuessDto {
                 "matchId="  +matchId+
                 "predictedHomeScore="+ predictedHomeScore+
                 "predictedAwayScore="+ predictedAwayScore+
+                "timeIsUp=+"+timeIsUp+
                 "}";
     }
 

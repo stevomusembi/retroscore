@@ -37,7 +37,8 @@ public class SettingsController {
     }
 
     @PutMapping
-    public  ResponseEntity<UserSettingsDto> updateUserSettings(@AuthenticationPrincipal UserPrincipal principal, @RequestBody UserSettingsDto settingsDto){
+    public  ResponseEntity<UserSettingsDto> updateUserSettings(@AuthenticationPrincipal UserPrincipal principal,
+                                                               @RequestBody UserSettingsDto settingsDto){
         try {
            Long userId = principal.getUserId();
            UserSettingsDto updatedSettings = userService.updateUserSettings(userId, settingsDto);
@@ -55,6 +56,20 @@ public class SettingsController {
         try {
             Long userId = principal.getUserId();
             userService.updateGameDifficulty(userId, difficulty);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/timeLimit")
+    public ResponseEntity<Void> updateTimeLimit(@AuthenticationPrincipal UserPrincipal principal,
+                                                     @RequestParam String timeLimit){
+        try {
+            Long userId = principal.getUserId();
+            userService.updateTimeLimit(userId, timeLimit);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){
             return ResponseEntity.notFound().build();

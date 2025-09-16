@@ -5,6 +5,7 @@ import com.retroscore.dto.GoogleUserInfo;
 import com.retroscore.dto.UserSettingsDto;
 import com.retroscore.entity.User;
 import com.retroscore.enums.GameDifficulty;
+import com.retroscore.enums.TimerDurations;
 import com.retroscore.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -89,6 +90,16 @@ public class UserService {
             throw new EntityNotFoundException("user not found");
         }
         user.setGameDifficulty(GameDifficulty.valueOf(difficulty.toUpperCase()));
+        updateUser(user);
+
+    }
+
+    public void updateTimeLimit(Long userId, String timeLimit){
+        User user = findById(userId);
+        if(user == null){
+            throw new EntityNotFoundException("user not found");
+        }
+        user.setTimeLimit(TimerDurations.valueOf(timeLimit.toUpperCase()));
         updateUser(user);
 
     }
