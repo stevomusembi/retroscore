@@ -1,5 +1,6 @@
 package com.retroscore.dto;
 
+import com.retroscore.enums.MatchResult;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -20,6 +21,10 @@ public class UserGuessDto {
 
     private Boolean timeIsUp = false;
 
+    private Boolean isEasyMode = false;
+
+    private MatchResult matchResult;
+
     public UserGuessDto(){}
 
     public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp){
@@ -36,6 +41,8 @@ public class UserGuessDto {
                 "predictedHomeScore="+ predictedHomeScore+
                 "predictedAwayScore="+ predictedAwayScore+
                 "timeIsUp=+"+timeIsUp+
+                "isEasyMode=+"+isEasyMode+
+                "matchResult=+"+matchResult+
                 "}";
     }
 

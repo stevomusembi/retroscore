@@ -193,6 +193,11 @@ public class GameService {
 
         }
 
+        // user is playing in easy mode
+        if(userGuess.getIsEasyMode() == true){
+            return null;
+        }
+
 
         // check if user has played the specific match before
         Optional<UserGame> existingUserGame = userGameRepository.findByUserIdAndMatchId(userId, match.getId());
