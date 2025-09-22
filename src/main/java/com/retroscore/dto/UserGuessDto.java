@@ -27,11 +27,13 @@ public class UserGuessDto {
 
     public UserGuessDto(){}
 
-    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp){
+    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp,Boolean isEasyMode, MatchResult matchResult){
         this.matchId = matchId;
         this.predictedHomeScore = predictedHomeScore;
         this.predictedAwayScore = predictedAwayScore;
         this.timeIsUp = timeIsUp;
+        this.isEasyMode = isEasyMode;
+        this.matchResult = matchResult;
     }
 
     @Override
