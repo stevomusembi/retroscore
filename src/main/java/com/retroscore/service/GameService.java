@@ -6,6 +6,7 @@ import com.retroscore.entity.Match;
 import com.retroscore.entity.User;
 import com.retroscore.entity.UserGame;
 import com.retroscore.enums.GameResult;
+import com.retroscore.enums.MatchResult;
 import com.retroscore.exception.MatchNotFoundException;
 import com.retroscore.exception.NoMatchesFoundException;
 import com.retroscore.exception.UserAlreadyPlayedException;
@@ -178,6 +179,7 @@ public class GameService {
 
         // user failed to submit a guess in time, we don't record it as a user game
         if (userGuess.getTimeIsUp() == true){
+            MatchResult actualMatchResult = getMatchResultEnum(match.getHomeScore(), match.getAwayScore());
             return UserGameResponse.builder()
                     .matchId(match.getId())
                     .matchTitle(match.getMatchTitle())
@@ -189,9 +191,12 @@ public class GameService {
                     .playedAt(LocalDateTime.now())
                     .resultMessage(GameResult.TIMEUP.getMessage())
                     .userGamePoints(GameResult.TIMEUP.getPoints())
+                    .actualMatchResult(actualMatchResult)
                     .build();
 
         }
+
+
 
 
         // check if user has played the specific match before
@@ -200,18 +205,35 @@ public class GameService {
             throw new UserAlreadyPlayedException(userId, match.getId());
         }
 
+        logger.info("This is the submission from user={}",userGuess);
         // create new user game if it is the first time playing this match.
         UserGame userGame = new UserGame();
 
         userGame.setUser(user);
         userGame.setPlayedAt(LocalDateTime.now());
         userGame.setMatch(match);
-        userGame.setPredictedHomeScore(userGuess.getPredictedHomeScore());
-        userGame.setPredictedAwayScore(userGuess.getPredictedAwayScore());
 
-        //calculate other user game results
-        calculateGameResult(userGame,match);
+        if(userGuess.getIsEasyMode() == true){
+            userGame.setPredictedHomeScore(null);
+            userGame.setPredictedAwayScore(null);
+            userGame.setIsCorrectScore(false);
 
+            MatchResult userSubmittedResult =  userGuess.getMatchResult();
+            MatchResult actualMatchResult = getMatchResultEnum(match.getHomeScore(), match.getAwayScore());
+
+            if(actualMatchResult == userSubmittedResult) {
+                userGame.setIsCorrectResult(true);
+            } else {
+                userGame.setIsCorrectResult(false);
+            }
+        }
+
+        if(userGuess.getIsEasyMode() != true) {
+            userGame.setPredictedHomeScore(userGuess.getPredictedHomeScore());
+            userGame.setPredictedAwayScore(userGuess.getPredictedAwayScore());
+            //calculate other user game results
+            calculateGameResult(userGame, match);
+        }
         UserGame savedGame =  userGameRepository.save(userGame);
 
         // update user entity's stats
@@ -286,7 +308,7 @@ public class GameService {
 
     private UserGameResponse buildUserGameResponse(UserGame userGame, Match match){
         GameResult resultMessage = generateResultMessage(userGame);
-
+        MatchResult actualMatchResult = getMatchResultEnum(match.getHomeScore(), match.getAwayScore());
         return UserGameResponse.builder()
                 .userGameId(userGame.getId())
                 .matchId(match.getId())
@@ -301,9 +323,21 @@ public class GameService {
                 .playedAt(userGame.getPlayedAt())
                 .resultMessage(resultMessage.getMessage())
                 .userGamePoints(resultMessage.getPoints())
+                .actualMatchResult(actualMatchResult)
                 .build();
 
 
+    }
+
+    private MatchResult getMatchResultEnum(Integer homeScore, Integer awayScore) {
+        int comparison = homeScore.compareTo(awayScore);
+        if (comparison > 0) {
+            return MatchResult.HOME_WIN;
+        } else if (comparison < 0) {
+            return MatchResult.AWAY_WIN;
+        } else {
+            return MatchResult.DRAW;
+        }
     }
 
     private GameResult generateResultMessage(UserGame userGame){

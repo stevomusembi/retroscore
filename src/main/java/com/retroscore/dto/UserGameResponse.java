@@ -1,6 +1,7 @@
 package com.retroscore.dto;
 
 import com.retroscore.enums.GameResult;
+import com.retroscore.enums.MatchResult;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class UserGameResponse {
     private GameResult gameResult;
     private String resultMessage;
     private Integer userGamePoints;
+    private MatchResult actualMatchResult;
 
     public UserGameResponse() {}
 
@@ -93,6 +95,11 @@ public class UserGameResponse {
 
         public Builder userGamePoints(Integer userGamePoints){
             response.userGamePoints = userGamePoints;
+            return this;
+        }
+
+        public Builder actualMatchResult(MatchResult matchResult){
+            response.actualMatchResult = matchResult;
             return this;
         }
 

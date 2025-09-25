@@ -1,5 +1,6 @@
 package com.retroscore.dto;
 
+import com.retroscore.enums.MatchResult;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -20,13 +21,19 @@ public class UserGuessDto {
 
     private Boolean timeIsUp = false;
 
+    private Boolean isEasyMode = false;
+
+    private MatchResult matchResult;
+
     public UserGuessDto(){}
 
-    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp){
+    public UserGuessDto(Long matchId, Integer predictedHomeScore, Integer predictedAwayScore,Boolean timeIsUp,Boolean isEasyMode, MatchResult matchResult){
         this.matchId = matchId;
         this.predictedHomeScore = predictedHomeScore;
         this.predictedAwayScore = predictedAwayScore;
         this.timeIsUp = timeIsUp;
+        this.isEasyMode = isEasyMode;
+        this.matchResult = matchResult;
     }
 
     @Override
@@ -36,6 +43,8 @@ public class UserGuessDto {
                 "predictedHomeScore="+ predictedHomeScore+
                 "predictedAwayScore="+ predictedAwayScore+
                 "timeIsUp=+"+timeIsUp+
+                "isEasyMode=+"+isEasyMode+
+                "matchResult=+"+matchResult+
                 "}";
     }
 
