@@ -68,6 +68,7 @@ public UserStatsWithRank getUserStatsWithRank(Long userId){
                 .correctResultPredictions(correctResults)
                 .winPercentage(user.getWinPercentage())
                 .currentRank(rank)
+                .profilePictureURL(user.getProfilePicture())
                 .build();
 
 }
@@ -82,6 +83,7 @@ public  LeaderBoardEntry mapToLeaderBoardEntry(User user){
                 .gamesPlayed(user.getGamesPlayed())
                 .winPercentage(user.getWinPercentage())
                 .rank(rank)
+                .profilePictureURL(user.getProfilePicture())
                 .build();
 }
 
