@@ -22,11 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findTop20ByOrderByTotalPointsDescCreatedAtAsc();
 
     // Get user rank by points
-    @Query("SELECT COUNT(u) + 1 FROM User u WHERE (u.exactScorePredictions * 3 + u.correctResultPredictions) > :userPoints")
+    @Query("SELECT COUNT(u) + 1 FROM User u WHERE u.totalPoints > :userPoints")
     Long findUserRankByPoints(@Param("userPoints") Integer userPoints);
-
-//    @Query("SELECT COUNT(u) + 1 FROM User u WHERE u.totalPoints > :userPoints")
-//    Long findUserRankByPoints(@Param("userPoints") Integer userPoints);
 
     Page<User> findAllByOrderByTotalPointsDescCreatedAtAsc(Pageable pageable);
 
