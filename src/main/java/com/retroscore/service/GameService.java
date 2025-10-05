@@ -197,8 +197,6 @@ public class GameService {
         }
 
 
-
-
         // check if user has played the specific match before
         Optional<UserGame> existingUserGame = userGameRepository.findByUserIdAndMatchId(userId, match.getId());
         if (existingUserGame.isPresent()){
@@ -221,11 +219,7 @@ public class GameService {
             MatchResult userSubmittedResult =  userGuess.getMatchResult();
             MatchResult actualMatchResult = getMatchResultEnum(match.getHomeScore(), match.getAwayScore());
 
-            if(actualMatchResult == userSubmittedResult) {
-                userGame.setIsCorrectResult(true);
-            } else {
-                userGame.setIsCorrectResult(false);
-            }
+            userGame.setIsCorrectResult(actualMatchResult == userSubmittedResult);
         }
 
         if(userGuess.getIsEasyMode() != true) {
@@ -234,6 +228,7 @@ public class GameService {
             //calculate other user game results
             calculateGameResult(userGame, match);
         }
+
         UserGame savedGame =  userGameRepository.save(userGame);
 
         // update user entity's stats
@@ -276,7 +271,8 @@ public class GameService {
         else {
                 user.setGamesLost(user.getGamesLost()+1);
         }
-
+        user.setTotalPoints(user.calculateTotalPoints());
+        logger.info("users total points are ={}", user.getTotalPoints());
         userRepository.save(user);
     }
 
