@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,9 +35,13 @@ public class LeaderBoardService {
 
         Page<User> users = userRepository.findAllByOrderByTotalPointsDescCreatedAtAsc(pageable);
 
-        List<LeaderBoardEntry> entries = users.getContent().stream()
-                .map(this::mapToLeaderBoardEntry)
-                .collect(Collectors.toList());
+        List<LeaderBoardEntry> entries = new ArrayList<>();
+        for (int i = 0; i < users.getContent().size(); i++) {
+            User user = users.getContent().get(i);
+            Long rank = ((long) page * size + i + 1); // global rank
+            LeaderBoardEntry entry = mapToLeaderBoardEntry(user, rank);
+            entries.add(entry);
+        }
         return LeaderBoardResponse.builder()
                         .entries(entries)
                         .totalUsers(users.getTotalElements())
@@ -47,7 +52,7 @@ public class LeaderBoardService {
 public UserStatsWithRank getUserStatsWithRank(Long userId){
         User user = userRepository.findById(userId).
                 orElseThrow(()-> new RuntimeException("user not found"));
-        Long rank = userRepository.findUserRankByPoints(user.getTotalPoints());
+        Long rank = userRepository.findUserRankByPoints(user.calculateTotalPoints());
 
         List<UserGame> userGames = userGameRepository.findByUserId(userId);
 
@@ -68,12 +73,11 @@ public UserStatsWithRank getUserStatsWithRank(Long userId){
                 .correctResultPredictions(correctResults)
                 .winPercentage(user.getWinPercentage())
                 .currentRank(rank)
+                .profilePictureURL(user.getProfilePicture())
                 .build();
 
 }
-public  LeaderBoardEntry mapToLeaderBoardEntry(User user){
-
-    Long rank = userRepository.findUserRankByPoints(user.getTotalPoints());
+public  LeaderBoardEntry mapToLeaderBoardEntry(User user, Long rank){
 
         return LeaderBoardEntry.builder()
                 .userId(user.getId())
@@ -82,6 +86,7 @@ public  LeaderBoardEntry mapToLeaderBoardEntry(User user){
                 .gamesPlayed(user.getGamesPlayed())
                 .winPercentage(user.getWinPercentage())
                 .rank(rank)
+                .profilePictureURL(user.getProfilePicture())
                 .build();
 }
 

@@ -14,4 +14,5 @@ public class UserStatsWithRank {
     private Integer exactScorePredictions;
     private Integer correctResultPredictions;
     private Long currentRank;
+    private String profilePictureURL;
 }

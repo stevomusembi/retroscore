@@ -12,4 +12,5 @@ public class LeaderBoardEntry {
     private Integer gamesPlayed;
     private Double winPercentage;
     private Long rank;
+    private String profilePictureURL;
 }
