@@ -211,7 +211,8 @@ public class GameService {
         userGame.setPlayedAt(LocalDateTime.now());
         userGame.setMatch(match);
 
-        if(userGuess.getIsEasyMode() == true){
+        if(Boolean.TRUE.equals(userGuess.getIsEasyMode())){
+            logger.info("This is the entry for easy mode play with a match result ={}", userGuess);
             userGame.setPredictedHomeScore(null);
             userGame.setPredictedAwayScore(null);
             userGame.setIsCorrectScore(false);
@@ -220,9 +221,8 @@ public class GameService {
             MatchResult actualMatchResult = getMatchResultEnum(match.getHomeScore(), match.getAwayScore());
 
             userGame.setIsCorrectResult(actualMatchResult == userSubmittedResult);
-        }
-
-        if(userGuess.getIsEasyMode() != true) {
+        }else {
+            logger.info("This is the entry for hard mode play with no match result ={}", userGuess);
             userGame.setPredictedHomeScore(userGuess.getPredictedHomeScore());
             userGame.setPredictedAwayScore(userGuess.getPredictedAwayScore());
             //calculate other user game results

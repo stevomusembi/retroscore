@@ -1,0 +1,38 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+
+# Test files
+**/test/
+*.test
+
+# Documentation
+README.md
+docs/
+
+# Environment files (we'll pass these via docker-compose)
+.env
+.env.local
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore

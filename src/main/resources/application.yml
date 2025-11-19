@@ -16,6 +16,8 @@ spring:
             android-client-id: ${GOOGLE_ANDROID_CLIENT_ID}
             client-id: ${GOOGLE_WEB_CLIENT_ID}
             client-secret: ${GOOGLE_WEB_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+#            redirect-uri: "http://localhost/login/oauth2/code/google"
             scope:
               - openid
               - profile
@@ -57,6 +59,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.web: DEBUG
     com.retroscore: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds

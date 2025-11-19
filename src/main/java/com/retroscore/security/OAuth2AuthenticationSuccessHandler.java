@@ -1,9 +1,11 @@
 package com.retroscore.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.retroscore.dto.GoogleUserInfo;
 import com.retroscore.entity.User;
 import com.retroscore.repository.UserRepository;
 import com.retroscore.service.JWTService;
+import com.retroscore.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,6 +31,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     @Autowired
     private JWTService jwtService;
 
+
+    @Autowired
+    private  UserService userService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -46,22 +52,15 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         logger.info("OAuth2 authentication successful for user: {}", authentication.getName());
 
         try {
-            // Extract UserPrincipal from authentication
-            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-            String email = oidcUser.getEmail();
-            String name = oidcUser.getFullName();
+            GoogleUserInfo googleUserInfo = getInfo(authentication);
 
-            // Load your User entity from DB
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            // Find or create user
+            User user = userService.findOrCreateFromGoogleInfo(googleUserInfo);
 
             logger.info("Generating JWT for user ID: {} ({})", user.getId(), user.getEmail());
 
-            // Generate JWT token
             String jwtToken = jwtService.generateToken(user);
 
-            // This handler is only used for web popup authentication
-            // Mobile apps use the direct API endpoints (/auth/google/mobile)
             handlePopupSuccess(response, jwtToken, user);
 
         } catch (Exception e) {
@@ -69,6 +68,24 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             handlePopupError(response, "Authentication processing failed");
         }
     }
+
+    private static GoogleUserInfo getInfo(Authentication authentication) {
+        OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+
+        // Build GoogleUserInfo using setters
+        GoogleUserInfo googleUserInfo = new GoogleUserInfo();
+        googleUserInfo.setEmail(oidcUser.getEmail());
+        googleUserInfo.setName(oidcUser.getFullName());
+        googleUserInfo.setPicture(oidcUser.getPicture());
+        googleUserInfo.setSub(oidcUser.getSubject());
+
+        // Optional: populate additional fields if available
+        googleUserInfo.setEmailVerified(Boolean.TRUE.equals(oidcUser.getEmailVerified()));
+        googleUserInfo.setGivenName(oidcUser.getGivenName());
+        googleUserInfo.setFamilyName(oidcUser.getFamilyName());
+        return googleUserInfo;
+    }
+
 
     /**
      * Handle popup success for web app

@@ -1,11 +1,19 @@
 package com.retroscore;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class RetroScoreApiApplication {
 
+
+    @PostConstruct
+    public void logDatabaseConfig() {
+        System.out.println("Connecting to DB:");
+        System.out.println("  URL: " + System.getenv("DATABASE_URL"));
+        System.out.println("  Username: " + System.getenv("DATABASE_USERNAME"));
+    }
 	public static void main(String[] args) {
 
 		SpringApplication.run(RetroScoreApiApplication.class, args);

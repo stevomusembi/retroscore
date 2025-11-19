@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Spring Boot Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retroscore-api
+    ports:
+      - "8080:8080"
+    environment:
+      # Database connection (connecting to host machine's PostgreSQL)
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+
+      # Google OAuth (leave empty for now)
+      - GOOGLE_ANDROID_CLIENT_ID=${GOOGLE_ANDROID_CLIENT_ID:-}
+      - GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID:-}
+      - GOOGLE_WEB_CLIENT_SECRET=${GOOGLE_WEB_CLIENT_SECRET:-}
+
+    # Use host network mode to access local PostgreSQL
+    # Alternative: use extra_hosts (see below)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    networks:
+      - retroscore-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend (assuming you already have this dockerized)
+  # Uncomment and modify if you want to include it in this compose file
+  # frontend:
+  #   image: your-frontend-image:latest
+  #   container_name: retroscore-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - REACT_APP_API_URL=http://backend:8080/api
+  #   networks:
+  #     - retroscore-network
+  #   depends_on:
+  #     - backend
+
+networks:
+  retroscore-network:
+    driver: bridge
